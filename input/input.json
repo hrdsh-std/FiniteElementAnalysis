@@ -1,0 +1,46 @@
+{
+    "analysis_settings": [
+      {
+        "analysis_type": "static",
+        "solver": "direct",
+        "tolerance": 1e-6,
+        "element_type": "Quad_8node"
+      }
+    ],
+    
+    "materials": [
+      {"id":0, "name":"Steel","E": 205000, "nu": 0.3}
+    ],
+
+    "sections": [
+      {
+        "id": 0,
+        "type": "plane_stress",
+        "thickness": 10
+      }
+    ],
+
+    "nodes": [
+      {"id": 0, "x": 0.0, "y": 0.0},
+      {"id":1, "x":1, "y":0},
+      {"id":2, "x":2, "y":0},
+      {"id":5, "x":2, "y":1},
+      {"id":4, "x":1, "y":1},
+      {"id":3, "x":0, "y":1}
+    ],
+
+    "elements": [
+      {"id":0, "type": "quad", "nodes": [0,1,4,3], "section_id":0},
+      {"id":1, "type": "quad", "nodes": [1,2,5,4], "section_id":0}
+    ],
+
+    "boundary_conditions": [
+      {"node": 0, "type": [0, 0]},
+      {"node": 3, "type": [0, 0]}
+    ],
+
+    "loads": [
+      {"node": 2,  "value": [0, 0.0]},
+      {"node": 5,  "value": [0, 0.0]}
+    ]
+  }
