@@ -14,6 +14,7 @@ class Element:
     def __init__(self,idx,node_idxs,section):
         self.id = idx
         self.node = node_idxs
+        self.cornernode = node_idxs
         self.section = section
         self.xy = None
     

@@ -157,7 +157,6 @@ class Solver:
         """
         stress_dict = {i : np.zeros(3) for i in range(len(self.fem_model.nodes))}
         counts_dict = {i : 0 for i in range(len(self.fem_model.nodes))}
-        stress_at_gps = np.array([])
 
         for key,elem in self.mesh.elements.items():
             nodes_ind = []
@@ -167,7 +166,6 @@ class Solver:
                 d_elem = self.d[nodes_ind]
 
             stress_e = []
-            ave_stress_e = np.zeros(3)
             for i, gp in enumerate(self.gps):
                 xi, eta = gp[0], gp[1]
                 B, J = CalcStifness.calc_B(self.fem_model,elem, xi, eta) #プロパティに設定してもよい
@@ -175,11 +173,14 @@ class Solver:
             #ave_stress_e /= 9
 
             #ここに最小二乗法で節点力を出すコード
+            
+            node_stress_e = self.calc_stress_by_lstsq(stress_e,self.gps)
+            
             #ここに節点位置での平均応力を出すコード
             
             for i in range(4):
-                stress_dict[elem.node[i]] += (stress_e[i] - ave_stress_e) * np.sqrt(3) + ave_stress_e
-                counts_dict[elem.node[i]] += 1
+                stress_dict[elem.cornernode[i]] += node_stress_e[i]
+                counts_dict[elem.cornernode[i]] += 1
 
         for i in range(len(self.fem_model.ori4node)):
             stress_dict[i] = stress_dict[i]  / counts_dict[i]
@@ -203,14 +204,12 @@ class Solver:
 
         return max_dx,max_dy
 
-    def calc_stress_by_lstsq(self):
-        integration_points = np.array(self.gps) #(xi,eta,wi,wj)
-        stress_dict = {i : np.zeros(3) for i in range(len(self.fem_model.ori4node))}
-        
-        # 積分点での応力（例: σ_x の値を仮定）
-        sigma_values = np.array([100, 110, 120,
-                                130, 140, 150,
-                                160, 170, 180])  # 任意の応力データ
+    def calc_stress_by_lstsq(self,stress_e,gps):
+        integration_points = np.array(gps) #(xi,eta,wi,wj)
+        stress_e = np.array(stress_e)
+        sigX = np.array(stress_e[:,0])
+        sigY = np.array(stress_e[:,1])
+        tauXY = np.array(stress_e[:,2])
 
         A = np.column_stack([
             np.ones(len(integration_points)),  # 定数項
@@ -222,6 +221,30 @@ class Solver:
         ])
 
         # 最小二乗法で係数 a を求める
-        coefficients, _, _, _ = np.linalg.lstsq(A, sigma_values, rcond=None)
-            
-            
+        coefficients_sigX, _, _, _ = np.linalg.lstsq(A, sigX, rcond=None)
+        coefficients_sigY, _, _, _ = np.linalg.lstsq(A, sigY, rcond=None)
+        coefficients_tauXY, _, _, _ = np.linalg.lstsq(A, tauXY, rcond=None)
+
+        corner_nodes = np.array([
+            [-1, -1], [1, -1], [1, 1], [-1, 1]
+        ])
+        
+        A_corners = np.column_stack([
+            np.ones(len(corner_nodes)),  
+            corner_nodes[:, 0],  
+            corner_nodes[:, 1],  
+            corner_nodes[:, 0]**2,  
+            corner_nodes[:, 1]**2,  
+            corner_nodes[:, 0] * corner_nodes[:, 1]
+        ])
+
+        sigX_nodes = A_corners @ coefficients_sigX
+        sigY_nodes = A_corners @ coefficients_sigY
+        tauXY_nodes = A_corners @ coefficients_tauXY
+
+        node_stress_e = np.column_stack([sigX_nodes,sigY_nodes,tauXY_nodes])
+        node_stress_e = node_stress_e.tolist()
+        
+        print(node_stress_e)
+        return node_stress_e #4x3
+        
