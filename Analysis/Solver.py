@@ -245,6 +245,5 @@ class Solver:
         node_stress_e = np.column_stack([sigX_nodes,sigY_nodes,tauXY_nodes])
         node_stress_e = node_stress_e.tolist()
         
-        print(node_stress_e)
         return node_stress_e #4x3
         

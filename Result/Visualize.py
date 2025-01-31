@@ -9,7 +9,7 @@ class Visualize:
          self.solver = solver
 
     def plot_deform(self,ratio=50):
-            x = np.array([[node.x, node.y] for idx, node in self.solver.mesh.nodes.items()])
+            x = np.array([[node.x, node.y] for idx, node in self.solver.fem_model.ori4node.items()])
             x_new = x + self.solver.d.reshape(len(self.solver.fem_model.ori4node), 2) * ratio
             fig, ax = plt.subplots()
             for v in self.solver.mesh.elements:
@@ -31,7 +31,7 @@ class Visualize:
             stress_idx (int(0~3)): 0-x応力, 1-y応力, 2-せん断応力, 3-von Mises
             ratio (float): 変形の倍率
         """
-        x = np.array([[node.x, node.y] for idx, node in self.solver.mesh.nodes.items()])
+        x = np.array([[node.x, node.y] for idx, node in self.solver.fem_model.ori4node.items()])
         x_new = x + self.solver.d.reshape(len(self.solver.fem_model.ori4node), 2) * ratio
         nodal_values = []
         for i in range(len(self.solver.fem_model.ori4node)):
@@ -45,7 +45,7 @@ class Visualize:
             elements_tris.append([elm.node[0], elm.node[2], elm.node[3]])
         triangulation = tri.Triangulation(nodes_x, nodes_y, elements_tris)
         fig, ax = plt.subplots()
-        result = ax.tricontourf(triangulation, nodal_values, cmap='jet')
+        result = ax.tricontourf(triangulation, nodal_values,vmin = 0,vmax=40,cmap='jet')
         for key,v in self.solver.mesh.elements.items():#要素境界の表示
             xy_new = [(x_new[idx, 0], x_new[idx, 1]) for idx in v.node[:4]]
             patch = patches.Polygon(xy=xy_new,ec='grey', fill=False)
