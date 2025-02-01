@@ -15,9 +15,9 @@ class FEMModel:
         self.materials = self.read_materials()
         self.sections = self.read_sections()
         self.nodes = self.read_nodes()
+        self.read_boundary_conditions()
         self.ori4node = self.nodes
         self.elements = self.read_elements()
-        self.read_boundary_conditions()
         self.read_loads()
         self.mesh = Mesh(self.nodes,self.elements,self.materials[0])#materialはElementが保持すべき？
         self.analysis_setting = self.read_analysis_settings()
@@ -80,12 +80,19 @@ class FEMModel:
                 mid_x = (n1.x + n2.x) / 2
                 mid_y = (n1.y + n2.y) / 2
                 
+                #両端の拘束条件がおなじなら、中間節点にも同じ拘束条件を与える
+                if n1.bc_dist == n2.bc_dist:
+                    mid_bc =  n1.bc_dist
+                else:
+                    mid_bc = [None,None]
+                    
                 # 座標がすでに登録されている場合は共有
                 if (mid_x, mid_y) in mid_nodes:
                     mid_node_id = mid_nodes[(mid_x, mid_y)]
                 else:
                     mid_node_id = next_node_id
                     self.nodes[mid_node_id] = Node(mid_node_id, mid_x, mid_y)
+                    self.nodes[mid_node_id].bc_dist = mid_bc
                     mid_nodes[(mid_x, mid_y)] = mid_node_id
                     next_node_id += 1
 
@@ -96,3 +103,4 @@ class FEMModel:
             # 要素の節点リストを更新（コーナー節点 + 中間節点）
             elem.nodes = elem.node[:4] + mid_point_ids
             elem.add_node(node_dict)
+            

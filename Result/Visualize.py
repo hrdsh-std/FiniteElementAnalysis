@@ -45,14 +45,14 @@ class Visualize:
             elements_tris.append([elm.node[0], elm.node[2], elm.node[3]])
         triangulation = tri.Triangulation(nodes_x, nodes_y, elements_tris)
         fig, ax = plt.subplots()
-        result = ax.tricontourf(triangulation, nodal_values,vmin = 0,vmax=40,cmap='jet')
+        result = ax.tricontourf(triangulation, nodal_values,cmap='jet')
         for key,v in self.solver.mesh.elements.items():#要素境界の表示
             xy_new = [(x_new[idx, 0], x_new[idx, 1]) for idx in v.node[:4]]
             patch = patches.Polygon(xy=xy_new,ec='grey', fill=False)
             ax.add_patch(patch)
         ax.autoscale()
         ax.set_aspect('equal', 'box')
-        #ax.axis('off')
+        ax.axis('off')
         fig.colorbar(result, ax=ax)
         max_dx,max_dy = self.solver.calc_max_d()
         fig.text(0.1, 0.1,f"max_dx:{max_dx:.4f} \nmax_dy:{max_dy:.4f}")
