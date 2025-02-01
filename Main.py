@@ -13,4 +13,3 @@ if __name__ == "__main__":
     solver = Solver(fem_model)
     visualize = ResultV(solver)
     visualize.plot_stress()
-    print(solver.d)
