@@ -16,7 +16,7 @@ class CalcStifness:
         D = np.array([
                     [1,mesh.material.nu,0],
                     [mesh.material.nu,1,0],
-                    [0,0,(1-mesh.material.nu)/2]  
+                    [0,0,(1-mesh.material.nu)/2] 
                         ]) * mesh.material.E / (1-mesh.material.nu**2)
         return D
     @staticmethod
@@ -30,11 +30,16 @@ class CalcStifness:
         else:
             return
     @staticmethod
-    def calc_B(fem_model,elem, xi, eta):
+    def calc_B(fem_model,elem, xi, eta,D,gps):
         if fem_model.analysis_setting["element_type"] == "Quad_4node":
-            return Calc_Q4.calc_B(elem, xi, eta)
+            B,_ = Calc_Q4.calc_B(elem, xi, eta)
+            return B
         elif fem_model.analysis_setting["element_type"] == "Quad_8node":
-            return Calc_Q8.calc_B(elem, xi, eta)
+            B,_ = Calc_Q8.calc_B(elem, xi, eta)
+            return B
+        elif fem_model.analysis_setting["element_type"] == "Quad_4node_Incomp":
+            _,Be = Calc_Q4Incomp.calc_KeBe(elem, xi, eta,D,gps)
+            return Be
         else:
             return
     @staticmethod

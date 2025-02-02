@@ -62,8 +62,8 @@ class Solver:
         Returns:
             stress_e (array 3x1): 節点応力
         """
-        stress_dict = {i : np.zeros(3) for i in range(len(self.fem_model.nodes))}
-        counts_dict = {i : 0 for i in range(len(self.fem_model.nodes))}
+        stress_dict = {i : np.zeros(3) for i in range(len(self.fem_model.ori4node))}
+        counts_dict = {i : 0 for i in range(len(self.fem_model.ori4node))}
 
         for key,elem in self.mesh.elements.items():
             nodes_ind = []
@@ -75,15 +75,13 @@ class Solver:
             stress_e = []
             for i, gp in enumerate(self.gps):
                 xi, eta = gp[0], gp[1]
-                B, J = CalcStifness.calc_B(self.fem_model,elem, xi, eta) #プロパティに設定してもよい
-                stress_e.append(np.dot(self.D, np.dot(B, d_elem).T)) #積分点での応力がもとまる9x3materix
-            #ave_stress_e /= 9
-
-            #ここに最小二乗法で節点力を出すコード
+                B = CalcStifness.calc_B(self.fem_model,elem, xi, eta,self.D,self.gps) #プロパティに設定してもよい
+                stress_e.append(np.dot(np.dot(self.D, B), d_elem.T))#積分点での応力がもとまる(9)x3materix
+            #最小二乗法で節点力を算出
             
             node_stress_e = self.calc_stress_by_lstsq(stress_e,self.gps)
             
-            #ここに節点位置での平均応力を出すコード
+            #節点位置での平均応力を算出
             
             for i in range(4):
                 stress_dict[elem.cornernode[i]] += node_stress_e[i]
