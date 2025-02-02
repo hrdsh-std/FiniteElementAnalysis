@@ -23,7 +23,7 @@ class Visualize:
             ax.set_aspect('equal', 'box')
             plt.show()  
 
-    def plot_stress(self, stress_idx=3, ratio=20):
+    def plot_stress(self, stress_idx=3, ratio=100):
         """
         応力プロットを作成。
 
@@ -32,7 +32,8 @@ class Visualize:
             ratio (float): 変形の倍率
         """
         x = np.array([[node.x, node.y] for idx, node in self.solver.fem_model.ori4node.items()])
-        x_new = x + self.solver.d.reshape(len(self.solver.fem_model.ori4node), 2) * ratio
+        d = np.array([[self.solver.d[2*idx], self.solver.d[2*idx+1]]for idx, node in self.solver.fem_model.ori4node.items()])
+        x_new = x + d * ratio
         nodal_values = []
         for i in range(len(self.solver.fem_model.ori4node)):
             nodal_values.append(self.solver.stress_dict[i][stress_idx])

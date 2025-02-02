@@ -1,4 +1,3 @@
-import json
 from Model.Material import Material
 from Model.Section import Section
 from Model.Node import Node
@@ -8,15 +7,13 @@ import numpy as np
 
 class FEMModel:
 
-    def __init__(self,json_file):
-        with open(json_file,"r",encoding="utf-8") as f:
-            self.data = json.load(f)
-
+    def __init__(self,data):
+        self.data = data
         self.materials = self.read_materials()
         self.sections = self.read_sections()
         self.nodes = self.read_nodes()
         self.read_boundary_conditions()
-        self.ori4node = self.nodes
+        self.ori4node = self.nodes.copy()
         self.elements = self.read_elements()
         self.read_loads()
         self.mesh = Mesh(self.nodes,self.elements,self.materials[0])#materialはElementが保持すべき？

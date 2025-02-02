@@ -22,7 +22,8 @@ class Solver:
         self.D = CalcStifness.calc_D(self.fem_model)
         self.K = CalcStifness.calc_K(self.fem_model,self.D,self.gps)
         self.d = CalcStifness.calc_d(self.fem_model,self.f , self.bc_dist_dict,self.K)
-
+        self.dx = self.d[::2]
+        self.dy = self.d[1::2]
         self.stress_dict = self.calc_stress()
         
     def read_boundary_cond(self):
@@ -104,8 +105,8 @@ class Solver:
         Returns:
             max_dx,max_dy: 最大変位
         """
-        max_dx = max(self.d[::2])
-        max_dy = max(self.d[1::2])
+        max_dx = max(self.dx)
+        max_dy = max(self.dy)
 
         return max_dx,max_dy
 
