@@ -25,6 +25,7 @@ class Solver:
         self.dx = self.d[::2]
         self.dy = self.d[1::2]
         self.stress_dict = self.calc_stress()
+        self.strain_energy = self.calc_strain_energy()
         
     def read_boundary_cond(self):
         """
@@ -153,3 +154,6 @@ class Solver:
         
         return node_stress_e #4x3
         
+    def calc_strain_energy(self):
+        strain_energy = 1/2 * self.d.T @ self.K @self.d
+        return strain_energy
